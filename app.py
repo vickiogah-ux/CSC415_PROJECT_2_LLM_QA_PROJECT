@@ -243,12 +243,22 @@ app = Flask(__name__)
 app.config['JSON_SORT_KEYS'] = False
 
 # Initialize LLM Q&A System
+qa_system = None
+qa_system_error = None
+
 try:
     provider = os.getenv("LLM_PROVIDER", "groq")
     qa_system = LLMQASystem(provider=provider)
+    print(f"✅ Q&A System initialized successfully with provider: {provider}")
 except (ValueError, ImportError) as e:
-    print(f"Warning: Could not initialize Q&A system: {e}")
-    qa_system = None
+    error_msg = str(e)
+    qa_system_error = error_msg
+    print(f"⚠️  Warning: Could not initialize Q&A system")
+    print(f"   Error: {error_msg}")
+    print(f"\n   How to fix:")
+    print(f"   1. On Render: Add environment variable GROQ_API_KEY in dashboard")
+    print(f"   2. Locally: Create .env file with GROQ_API_KEY=your_key_here")
+    print(f"   3. Get free key: https://console.groq.com/keys")
 
 
 @app.route('/')
@@ -285,10 +295,17 @@ def ask_question():
         
         # Check if Q&A system is initialized
         if qa_system is None:
+            error_details = qa_system_error or "Unknown error"
             return jsonify({
                 "success": False,
-                "error": "Q&A system not initialized. Please check API configuration."
-            }), 500
+                "error": "Q&A system not initialized",
+                "details": error_details,
+                "fix": {
+                    "on_render": "Add GROQ_API_KEY environment variable in Render dashboard",
+                    "locally": "Create .env file with GROQ_API_KEY=your_key_here",
+                    "get_key": "https://console.groq.com/keys"
+                }
+            }), 503
         
         # Process the question
         result = qa_system.process_question(question)
@@ -314,11 +331,23 @@ def ask_question():
 @app.route('/api/health', methods=['GET'])
 def health_check():
     """Check API health and system status."""
-    status = "healthy" if qa_system else "misconfigured"
-    return jsonify({
-        "status": status,
-        "provider": os.getenv("LLM_PROVIDER", "groq") if qa_system else None
-    }), 200 if qa_system else 503
+    if qa_system:
+        return jsonify({
+            "status": "healthy",
+            "provider": os.getenv("LLM_PROVIDER", "groq"),
+            "ready": True
+        }), 200
+    else:
+        return jsonify({
+            "status": "misconfigured",
+            "provider": os.getenv("LLM_PROVIDER", "groq"),
+            "ready": False,
+            "error": qa_system_error or "Unknown error",
+            "fix": {
+                "on_render": "Add GROQ_API_KEY environment variable",
+                "get_key": "https://console.groq.com/keys"
+            }
+        }), 503
 
 
 @app.errorhandler(404)
