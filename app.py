@@ -345,6 +345,13 @@ if __name__ == '__main__':
     
     print(f"Starting Flask application on {host}:{port}")
     print(f"Debug mode: {debug}")
+    print(f"Q&A System Status: {'Initialized' if qa_system else 'Failed to initialize'}")
+    
+    if not qa_system:
+        print("\n⚠️  WARNING: Q&A system failed to initialize!")
+        print("Please check that the following environment variables are set:")
+        print("- GROQ_API_KEY (or other LLM provider keys)")
+        print("- LLM_PROVIDER (default: groq)")
     
     # Run the Flask app
     app.run(debug=debug, host=host, port=port)

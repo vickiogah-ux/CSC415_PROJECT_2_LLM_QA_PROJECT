@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: llm-qa-system
+    env: python
+    region: ohio
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: FLASK_ENV
+        value: production
+      - key: LLM_PROVIDER
+        value: groq
