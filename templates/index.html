@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Q&A System</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container">
+            <div class="navbar-brand">
+                <i class="fas fa-brain"></i>
+                <span>LLM Q&A System</span>
+            </div>
+            <div class="navbar-links">
+                <a href="#features">How It Works</a>
+                <div class="navbar-status" id="providerBadge">
+                    <i class="fas fa-circle-check"></i>
+                    <span id="providerText">Initializing...</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="header-text">
+                    <h1>Ask Anything, Get Instant Answers</h1>
+                    <p>Powered by Advanced AI Language Models with NLP Processing</p>
+                </div>
+                <div class="header-icon">
+                    <i class="fas fa-brain"></i>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Question Input Section -->
+            <section class="input-section">
+                <div class="input-box">
+                    <textarea 
+                        id="questionInput"
+                        class="question-input"
+                        placeholder="What would you like to know? Ask anything..."
+                        rows="3"
+                        maxlength="2000"
+                    ></textarea>
+                    <div class="input-footer">
+                        <span class="char-count"><span id="charCount">0</span>/2000</span>
+                        <button id="askBtn" class="ask-button" type="button">
+                            <i class="fas fa-arrow-right"></i>
+                            Send
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Processing Status -->
+            <div id="processingStatus" class="processing-status hidden">
+                <div class="loader"></div>
+                <p>Thinking...</p>
+            </div>
+
+            <!-- Results Section -->
+            <section id="resultsSection" class="results-section hidden">
+                <!-- Question Summary -->
+                <div class="summary-card">
+                    <div class="summary-header">
+                        <i class="fas fa-comment-dots"></i>
+                        <span>Your Question</span>
+                    </div>
+                    <p id="originalQuestion" class="summary-text"></p>
+                </div>
+
+                <!-- Answer Card -->
+                <div class="answer-section">
+                    <div class="answer-header">
+                        <i class="fas fa-lightbulb"></i>
+                        <span>Answer</span>
+                    </div>
+                    <div class="answer-content">
+                        <p id="llmAnswer"></p>
+                    </div>
+                </div>
+
+                <!-- Details Section (Collapsible) -->
+                <details class="details-section">
+                    <summary class="details-summary">
+                        <i class="fas fa-sliders-h"></i>
+                        Processing Details
+                    </summary>
+                    <div class="details-content">
+                        <!-- Processed Question -->
+                        <div class="detail-item">
+                            <div class="detail-label">
+                                <i class="fas fa-filter"></i>
+                                Processed Question
+                            </div>
+                            <div class="detail-value">
+                                <code id="processedQuestion"></code>
+                            </div>
+                        </div>
+
+                        <!-- Tokens -->
+                        <div class="detail-item">
+                            <div class="detail-label">
+                                <i class="fas fa-tags"></i>
+                                Identified Words
+                            </div>
+                            <div id="tokensList" class="tokens-list"></div>
+                            <div class="token-count">Total: <strong id="tokenCount">0</strong> words</div>
+                        </div>
+
+                        <!-- Processing Info -->
+                        <div class="detail-item">
+                            <div class="detail-label">
+                                <i class="fas fa-cogs"></i>
+                                NLP Processing Steps
+                            </div>
+                            <div class="processing-steps">
+                                <div class="step"><span>1</span> Lowercasing</div>
+                                <div class="step"><span>2</span> Tokenization</div>
+                                <div class="step"><span>3</span> Punctuation Removal</div>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button id="copyAnswerBtn" class="btn-secondary" type="button">
+                        <i class="fas fa-copy"></i>
+                        Copy Answer
+                    </button>
+                    <button id="newQuestionBtn" class="btn-secondary" type="button">
+                        <i class="fas fa-plus"></i>
+                        New Question
+                    </button>
+                </div>
+            </section>
+
+            <!-- Error Message -->
+            <div id="errorMessage" class="error-box hidden">
+                <div class="error-content">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <div class="error-text">
+                        <span id="errorText"></span>
+                    </div>
+                    <button class="close-error" id="closeErrorBtn" type="button">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Features Section -->
+            <section id="features" class="features-section">
+                <h2>How It Works</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <i class="fas fa-keyboard"></i>
+                        <h3>Ask</h3>
+                        <p>Type any question in natural language</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-brain"></i>
+                        <h3>Process</h3>
+                        <p>AI analyzes and preprocesses your query</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-bolt"></i>
+                        <h3>Answer</h3>
+                        <p>Get instant, intelligent responses</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-eye"></i>
+                        <h3>Understand</h3>
+                        <p>See NLP processing details</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p>LLM Q&A System © 2025 | Covenant University</p>
+            <p class="footer-tech">Built with Flask, HTML5, and CSS3</p>
+        </footer>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden">
+        <span id="toastMessage"></span>
+    </div>
+
+    <script>
+        // DOM Elements
+        const questionInput = document.getElementById('questionInput');
+        const charCount = document.getElementById('charCount');
+        const askBtn = document.getElementById('askBtn');
+        const processingStatus = document.getElementById('processingStatus');
+        const resultsSection = document.getElementById('resultsSection');
+        const errorMessage = document.getElementById('errorMessage');
+        const errorText = document.getElementById('errorText');
+        const closeErrorBtn = document.getElementById('closeErrorBtn');
+        const copyAnswerBtn = document.getElementById('copyAnswerBtn');
+        const newQuestionBtn = document.getElementById('newQuestionBtn');
+        const toast = document.getElementById('toast');
+        const toastMessage = document.getElementById('toastMessage');
+        const providerBadge = document.getElementById('providerBadge');
+        const providerText = document.getElementById('providerText');
+
+        // Character counter
+        questionInput.addEventListener('input', (e) => {
+            charCount.textContent = e.target.value.length;
+        });
+
+        // Check API health on page load
+        async function checkHealth() {
+            try {
+                const response = await fetch('/api/health');
+                const data = await response.json();
+                if (data.status === 'healthy') {
+                    providerText.textContent = `${data.provider.toUpperCase()} Connected`;
+                    providerBadge.classList.add('connected');
+                } else {
+                    providerText.textContent = 'Configuration Required';
+                    providerBadge.classList.add('error');
+                }
+            } catch (error) {
+                providerText.textContent = 'Connection Failed';
+                providerBadge.classList.add('error');
+            }
+        }
+
+        checkHealth();
+
+        // Ask button click handler
+        askBtn.addEventListener('click', submitQuestion);
+
+        // Enter key handler for textarea (Ctrl+Enter to submit)
+        questionInput.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+                submitQuestion();
+            }
+        });
+
+        // Submit question
+        async function submitQuestion() {
+            const question = questionInput.value.trim();
+
+            if (!question) {
+                showError('Please enter a question.');
+                return;
+            }
+
+            // Disable input and button
+            askBtn.disabled = true;
+            questionInput.disabled = true;
+
+            // Show processing status
+            showProcessing(true);
+            hideError();
+            hideResults();
+
+            try {
+                const response = await fetch('/api/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ question: question })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    displayResults(data.data);
+                    showProcessing(false);
+                    showResults();
+                } else {
+                    showError(data.error || 'An error occurred.');
+                    showProcessing(false);
+                }
+            } catch (error) {
+                showError('Failed to communicate with the server: ' + error.message);
+                showProcessing(false);
+            } finally {
+                // Re-enable input and button
+                askBtn.disabled = false;
+                questionInput.disabled = false;
+                questionInput.focus();
+            }
+        }
+
+        // Display results
+        function displayResults(data) {
+            document.getElementById('originalQuestion').textContent = data.original_question;
+            document.getElementById('processedQuestion').textContent = data.processed_question;
+            document.getElementById('llmAnswer').textContent = data.answer;
+            document.getElementById('tokenCount').textContent = data.token_count;
+
+            // Display tokens with badges
+            const tokensList = document.getElementById('tokensList');
+            tokensList.innerHTML = '';
+            data.tokens.forEach((token, index) => {
+                const badge = document.createElement('span');
+                badge.className = 'token-badge';
+                badge.textContent = token;
+                badge.style.animationDelay = (index * 0.05) + 's';
+                tokensList.appendChild(badge);
+            });
+        }
+
+        // UI Helper Functions
+        function showProcessing(show) {
+            processingStatus.classList.toggle('hidden', !show);
+        }
+
+        function showResults() {
+            resultsSection.classList.remove('hidden');
+            resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function hideResults() {
+            resultsSection.classList.add('hidden');
+        }
+
+        function showError(message) {
+            errorText.textContent = message;
+            errorMessage.classList.remove('hidden');
+            errorMessage.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function hideError() {
+            errorMessage.classList.add('hidden');
+        }
+
+        function showToast(message) {
+            toastMessage.textContent = message;
+            toast.classList.remove('hidden');
+            setTimeout(() => {
+                toast.classList.add('hidden');
+            }, 3000);
+        }
+
+        // Event listeners
+        closeErrorBtn.addEventListener('click', hideError);
+
+        copyAnswerBtn.addEventListener('click', () => {
+            const answer = document.getElementById('llmAnswer').textContent;
+            navigator.clipboard.writeText(answer).then(() => {
+                showToast('Answer copied to clipboard!');
+            }).catch(() => {
+                showToast('Failed to copy answer');
+            });
+        });
+
+        newQuestionBtn.addEventListener('click', () => {
+            questionInput.value = '';
+            charCount.textContent = '0';
+            hideResults();
+            hideError();
+            questionInput.focus();
+        });
+    </script>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>
+            <strong>LLM Q&A System</strong> — Advanced Language Model with NLP Preprocessing
+        </p>
+        <p class="footer-tech">
+            Built with <strong>Flask</strong> • <strong>NLTK</strong> • <strong>Groq API</strong> • Multi-LLM Support
+        </p>
+        <p class="footer-tech">
+            © 2024 | Covenant University CSC 415 Project 2
+        </p>
+    </footer>
+</body>
+</html>
